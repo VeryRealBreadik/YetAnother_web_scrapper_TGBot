@@ -1,0 +1,6 @@
+__pycache__
+*.json
+*.txt
+*.env
+*.venv
+test_stuff
