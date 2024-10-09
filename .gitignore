@@ -3,5 +3,5 @@ __pycache__
 *.txt
 *.env
 *.venv
-test_stuff
+test.py
 *.html
