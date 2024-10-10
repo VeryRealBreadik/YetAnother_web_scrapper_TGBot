@@ -10,7 +10,7 @@ import os
 
 load_dotenv("essentials/.env")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-SCOPES = os.getenv("SCOPES")
+SCOPES = [os.getenv("SCOPES")]
 CREDENTIALS_FILE = os.getenv("CREDENTIALS_FILE")
 GSHEET_ID = os.getenv("GSHEET_ID")
 TABLE_RANGE = os.getenv("TABLE_RANGE")
@@ -28,4 +28,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-#  TODO: Fix issue with google (something is wrong either with credentials or something else)

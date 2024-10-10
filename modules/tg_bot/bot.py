@@ -18,17 +18,23 @@ class Bot:
         persistence = PicklePersistence(filepath=self.persistence_file_path)
         application = ApplicationBuilder().token(self.bot_token).persistence(persistence).build()
         application.add_handler(CommandHandler("start", self.start))
+        application.add_handler(CommandHandler("help", self.help))
         application.add_handler(CommandHandler("parse_offers", self.parse_cian))
         application.add_handler(CommandHandler("load_offers", self.load_offers_to_gsheet))
-
-        application.run_polling(allowed_updates=Update.ALL_TYPES)
+        
+        await application.initialize()
+        await application.start()
+        await application.updater.start_polling(allowed_updates=Update.ALL_TYPES)
 
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Hello! I'm a bot that can help you find an apartment. Type /help to see availible commands.")
 
+    async def help(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        await update.message.reply_text("Here are the availible commands:\n/start - show bot's description\n/help - show availible commands\n/parse_offers - parse offers from cian.ru\n/load_offers - load parsed offers to google sheet")
+
     async def parse_cian(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_data = context.user_data
-        url = update.message.text
+        url = context.args[0]
         self.web_scrapper.scrape_cian(url)
         user_data["offers_info_lst"] = self.web_scrapper.scrape_offers()
         offers_count = len(user_data["offers_info_lst"])
@@ -36,9 +42,13 @@ class Bot:
 
     async def load_offers_to_gsheet(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_data = context.user_data
-        offers_info_lst = user_data["offers_info_lst"]
-        offers_to_upload = []
-        for offer_info in offers_info_lst:
-            offers_to_upload.append(list(offer_info.values()))
+        if "offers_info_lst" not in user_data:
+            await update.message.reply_text("No offers to load. Type /parse_offers to scrape offers from cian.ru and then try again.")
+        else:
+            offers_info_lst = user_data["offers_info_lst"]
+            offers_to_upload = []
+            for offer_info in offers_info_lst:
+                offers_to_upload.append(list(offer_info.values()))
+            del user_data["offers_info_lst"]
 
-        self.gsheets_manager.upload_offers_info_to_gsheet(offers_to_upload)
+            self.gsheets_manager.upload_offers_info_to_gsheet(offers_to_upload)

@@ -13,12 +13,13 @@ class WebScrapper:
         count = 0
         while count < 100:
             response = requests.get(url)
-            bs = BeautifulSoup(response.text, "html.parser")
-            url = bs.find("nav", class_="_93444fe79c--pagination--VL341").find("a", class_="_93444fe79c--button--KVooB _93444fe79c--link-button--ujZuh _93444fe79c--M--I5Xj6 _93444fe79c--button--WChcG").get("href")
-            offers = bs.find_all("a", class_="_93444fe79c--media--9P6wN")
-            for offer in offers:
-                offer_url = offer.get("href")
-                self.offers_urls.append(offer_url)
+            if response.status_code == 200:
+                bs = BeautifulSoup(response.text, "html.parser")
+                url = bs.find("nav", class_="_93444fe79c--pagination--VL341").find("a", class_="_93444fe79c--button--KVooB _93444fe79c--link-button--ujZuh _93444fe79c--M--I5Xj6 _93444fe79c--button--WChcG").get("href")
+                offers = bs.find_all("a", class_="_93444fe79c--media--9P6wN")
+                for offer in offers:
+                    offer_url = offer.get("href")
+                    self.offers_urls.append(offer_url)
             sleep_value = random.randint(1, 3) / 10 * 6
             time.sleep(sleep_value)
             count += 1
